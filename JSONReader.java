@@ -102,6 +102,27 @@ public class JSONReader {
         nextChar(); // consume ']'
     }
 
+    private JSONBooleanType parseBooleanType() {
+        String expected = currentChar() == 't' ? "true" : "false";
+        for (char c : expected.toCharArray()) {
+            if (currentChar() != c) {
+                throw new JSONParseError("Invalid value at index " + index);
+            }
+            nextChar();
+        }
+        return new JSONBooleanType(expected.equals("true"));
+    }
+
+    private JSONNullType parseNullType() {
+        for (char c : "null".toCharArray()) {
+            if (currentChar() != c) {
+                throw new JSONParseError("Invalid value at index " + index);
+            }
+            nextChar();
+        }
+        return new JSONNullType();
+    }
+
     /**
      * Consumes the comma between values. <p>
      * Passes closingChar ('}' or ']') so it can tell the difference<p>
@@ -149,6 +170,12 @@ public class JSONReader {
         }
         if (Character.isDigit(currentChar()) || currentChar() == '-') {
             return parseNumberType();
+        }
+        if (currentChar() == 't' || currentChar() == 'f') {
+            return parseBooleanType();
+        }
+        if (currentChar() == 'n') {
+            return parseNullType();
         }
         return null;
     }
